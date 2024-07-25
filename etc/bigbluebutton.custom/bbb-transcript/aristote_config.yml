@@ -1,0 +1,59 @@
+##### ARISTOTE CONFIG FILE
+
+### STORAGE
+transcripts:
+  # Transcripts save location
+  base-directory: "/var/bigbluebutton/transcripts"
+  # Transcripts name (this will be appended to base-directory, with a slash)
+  filename: "{meeting_id}"
+  # The temp directory where we store the associations enrichment_id---meeting_id (this will be appended to the base-directory, without a slash)
+  meeting-map-directory: "/enrichment_to_meeting_temp"
+# The directory where the Ruby post_publish script should go search for audio files to upload for the enrichment
+audio-directory: "/var/bigbluebutton/recording/raw/{meeting_id}/audio"
+### CACHE
+# The path to the file containing the security salt (necessary to have a checksum to prevent anyone accessing the transcripts)
+secret-path: "/etc/bigbluebutton/bbb-web.properties"
+cache:
+  # The path to the token cache (currently accessed by a Ruby script and a PHP script)
+  token-path: "/var/bigbluebutton/token.cache"
+### SERVER CONFIGURATION
+aristote-server:
+  # Url of the aristote server
+  url: "https://aristote-preprod.k8s-cloud.centralesupelec.fr"
+  # Delete aristote enrichment (and enrichment-to-meeting local temp file) after successfully fetching it ?
+  keep-clean: true 
+  paths:
+    # Those path are for each of aristote's command that our files will need to retrieve a transcript
+    # list-enrichments is currently only used for debugging
+    list-enrichments: "/api/v1/enrichments"
+    new-enrichment: "/api/v1/enrichments/upload"
+    get-enrichment-last-version: "/api/v1/enrichments/{id}/versions/latest"
+    get-token: "/api/token"
+    delete-enrichment: "/api/v1/enrichments/{id}"
+# The local end-point where a GET request can be sent to get a meeting's transcript with its meeting ID
+get-transcript-url: "https://beta.lutice.online/bbb-transcript/get_transcript.php"
+# The local end-point where Aristote will notify that the enrichment is ready (and trigger the last step of the process)
+webhook-url: "https://beta.lutice.online/bbb-transcript/aristote_webhook.php"
+### ARISTOTE CREDENTIALS
+credentials:
+  id: ""
+  password: ""
+### LOGS & DEBUG
+logs:
+  # Will the requests to webhook-url, printed to the logs ?
+  print-webhook-requests: true
+  # Where each log type will be printed ? (Working to log everything in BBB)
+  paths:
+    about-token: "/var/log/bbb-transcript/tokens.log"
+    about-upload: "/var/log/bbb-transcript/enrichment_start.log"
+    about-webhook: "/var/log/bbb-transcript/webhook_php.log"
+    about-get-transcript: "/var/log/bbb-transcript/get_transcript.log"
+### ENRICHMENT OPTIONS
+# (THE FOLLOWING IS NOT SUPPORTED YET BY ARISTOTE)
+# AI MODEL
+# AiModel: LLama2-7b
+# AiModel: Llama-3-70b-Instruct-AWQ
+# AiModel: OpenHermes-2.5-Mistral-7B
+# INFRASTRUCTURE
+# Infrastructure: Univ-Paris-Saclay
+# Infrastructure: CentraleSupélec

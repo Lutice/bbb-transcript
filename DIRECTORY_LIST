@@ -4,3 +4,4 @@
 /etc/bigbluebutton.custom/bbb-transcript/test_scripts
 /var/log/bbb-transcript
 /var/www/bbb-transcript
+/var/www/bbb-transcript/lib
