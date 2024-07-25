@@ -8,14 +8,14 @@ This system provides an automated way to retrieve a transcript of any BigBlueBut
 To easily install the extension, I am currently working on a installation script (that will be customizable) that simply requires to be run as *root*.
 
 # How does it work ?
-In short, it uses the bigbluebutton post_publish phase to execute a ruby script at the end of a meeting, that will send the audio data to Aristote's API to begin the enrichment process. It then waits for Aristote's SUCCESS notification to retreieve and save the transcript automatically.
+In short, it uses the bigbluebutton *post_publish* phase to execute a ruby script at the end of a meeting, that will send the audio data to Aristote's API to begin the enrichment process. It then waits for Aristote's SUCCESS notification to retreieve and save the transcript automatically.
 
 ## Files and workflow
 
 ### All files list
 To function correctly, here is the list of the files needed (*provided in this github*) and their location:
 
-- `/usr/local/bigbluebutton/core/scripts/post_publish/post_publish_.rb`
+- `/usr/local/bigbluebutton/core/scripts/post_publish/post_publish_transcript.rb`
 
 - `/usr/local/bigbluebutton/core/lib/bbb-transcript/fields_checker.rb`
 - `/usr/local/bigbluebutton/core/lib/bbb-transcript/ruby_logger.rb`
@@ -23,6 +23,9 @@ To function correctly, here is the list of the files needed (*provided in this g
 
 - `/etc/bigbluebutton.custom/bbb-transcript/aristote_config.yml`
 - `/etc/bigbluebutton.custom/bbb-transcript/config.nginx`
+
+- `/etc/bigbluebutton.custom/bbb-transcript/test_scripts/get_all_enrichments.rb`
+- `/etc/bigbluebutton.custom/bbb-transcript/test_scripts/delete_enrichments.rb`
 
 - `/etc/bigbluebutton.custom/bbb-transcript/maintenance_scripts/delete_enrichments.rb`
 - `/etc/bigbluebutton.custom/bbb-transcript/maintenance_scripts/get_all_enrichments.rb`
