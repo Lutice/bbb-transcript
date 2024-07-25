@@ -5,7 +5,7 @@ This system provides an automated way to retrieve a transcript of any BigBlueBut
 
 # Installation
 
-To easily install the extension, I am currently working on a installation script be customizable) that will simply requires to be run as 'root'
+To easily install the extension, I am currently working on a installation script (that will be customizable) that simply requires to be run as *root*.
 
 # How does it work ?
 In short, it uses the bigbluebutton post_publish phase to execute a ruby script at the end of a meeting, that will send the audio data to Aristote's API to begin the enrichment process. It then waits for Aristote's SUCCESS notification to retreieve and save the transcript automatically.
@@ -71,7 +71,7 @@ One of the intented way, is by sending a GET request to the end point **[get-tra
 
 To get the transcript, simply send a GET request to the **[get-transcript-url]** url bearing two parameters: (*meeting_id*, *checksum*). MeetingId is the id reference of the meeting you want to retrive the transcript of. The checksum serves as an authentication field and is the hash (sha256) of *meeting_id* and the BBB security salt concatenated together.  
 The GET request will only be processed by the PHP file if it can verify that the checksum is correct.  
-- If the server cannot access the security salt and therefore is unable to verify the security salt, a 
+- If the server cannot access the security salt and therefore is unable to verify the security salt, a 500 error is returned.
 - If the checksum is incorrect, a 401 error is returned.
 - If a transcript for the provided meeting_id exists, it is returned.
 - If a transcript for the provided meeting_id does not exist, a 404 error is returned.
