@@ -3,9 +3,11 @@
 # The goal of BBB-transcript
 This system provides an automated way to retrieve a transcript of any BigBlueButton meeting thanks to the Aristote AI, developped by Central Supélec.
 
-# Installation
-
-To easily install the extension, I am currently working on a installation script (that will be customizable) that simply requires to be run as *root*.
+# How to use it ?
+## Quick install
+- `git clone https://github.com/AdriKat2022/bbb-transcript.git` to clone the project in a lambda temporary directory ;
+- `cd bbb-transcript/` to go in the cloned directory ;
+- `sudo ./installer.sh` and follow the instructions to install it on your system ;
 
 # How does it work ?
 In short, it uses the bigbluebutton *post_publish* phase to execute a ruby script at the end of a meeting, that will send the audio data to Aristote's API to begin the enrichment process. It then waits for Aristote's SUCCESS notification to retreieve and save the transcript automatically.
