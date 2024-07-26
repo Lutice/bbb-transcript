@@ -16,12 +16,15 @@ function usage(){
     echo -e ""
     echo -e "Usage:"
     echo -e "  ./installer.sh <options>"
-    echo
-    echo -e "Options:"
+    echo -e "  "
+    echo -e "Available actions:"
     echo -e "  --install\t\t\tTo install/update the system files"
     echo -e "  --uninstall\t\t\tDelete all related files"
-    echo -e "  --force\t\t\tDoesn't prompt confirmation upon uninstalling"
     echo -e "  --export_to <directory>\tExport all ACTUAL system files related to a new root directory"
+    echo -e "  "
+    echo -e "Flags:"
+    echo -e "  --confirm\t\t\tDisable the DRY RUN."
+    echo -e "  --force\t\t\tDoesn't prompt confirmation upon uninstalling"
     echo -e "  "
     echo -e "  "
 }
@@ -86,6 +89,12 @@ while [[ $# -ge 1 ]]; do
     
 done
 
+if [[ "$installing" == "true" && "$uninstalling" == "true" || "$installing" == "true" && -n "$export_to" || "$uninstalling" == "true" && -n "$export_to" ]]; then
+    echo "Error: Cannot perform multiple actions at once. Please choose between installing, uninstalling, or exporting to a folder."
+    usage
+    exit 0
+fi
+
 if [[ -z "$export_to" && "$dryrun" == "false" && "$force" != "true" ]]; then
     read -p "Are you sure you want to uninstall bbb-transcript ? (yes/no) " choice
 
@@ -133,7 +142,7 @@ if [[ -n "$export_to" ]]; then
 		    echo "Copied '$export_to$file_path'"
 		fi
 	    else
-		echo "Would create '$dir_name'"
+		# echo "Would create '$dir_name'"
 		echo "Would copy '$file_path' to '$export_to$file_path'"
 	    fi
 
@@ -182,7 +191,7 @@ elif [ "$installing" == "true" ]; then
 		    echo "Copied '$directory_src_folder$file_path'"
 		fi
 	    else
-		echo "Would create '$dir_name'"
+		# echo "Would create '$dir_name'"
 		echo "Would copy '$directory_src_folder$file_path' to '$file_path'"
 	    fi
 
@@ -226,7 +235,7 @@ elif [ "$installing" == "true" ]; then
 		    echo "Linked '$link_name' to '$target_link'"
 		fi
 	    else
-		echo "Would create '$dir_name'"
+		# echo "Would create '$dir_name'"
 		echo "Would link '$link_name' to '$target_link'"
 	    fi
 
@@ -278,7 +287,7 @@ elif [[ "$uninstalling" == "true" ]]; then
 		    echo "Unlinked '$link_name' to '$target_link'"
 		fi
 	    else
-		echo "Would unlink '$link_name' to '$target_link'"
+		echo -e "Would \e[0;31munlink\e[0m '$link_name' to '$target_link'"
 	    fi
 
 	else
@@ -309,8 +318,8 @@ elif [[ "$uninstalling" == "true" ]]; then
 
 		find "$dir_name" -type d -empty -delete
 	    else
-		echo "Would partially delete '$dir_name'"
-		echo "Would delete '$file_path'"
+		# echo "Would partially delete '$dir_name'"
+		echo -e "Would \e[0;31mdelete\e[0m '$file_path'"
 	    fi
 
 	else

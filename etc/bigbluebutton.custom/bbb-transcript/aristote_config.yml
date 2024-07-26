@@ -19,7 +19,7 @@ cache:
 ### SERVER CONFIGURATION
 aristote-server:
   # Url of the aristote server
-  url: "https://aristote-preprod.k8s-cloud.centralesupelec.fr"
+  url: "ARISTOTE_URL"
   # Delete aristote enrichment (and enrichment-to-meeting local temp file) after successfully fetching it ?
   keep-clean: true 
   paths:
@@ -31,9 +31,9 @@ aristote-server:
     get-token: "/api/token"
     delete-enrichment: "/api/v1/enrichments/{id}"
 # The local end-point where a GET request can be sent to get a meeting's transcript with its meeting ID
-get-transcript-url: "https://beta.lutice.online/bbb-transcript/get_transcript.php"
+get-transcript-url: "https://{server_url}/bbb-transcript/get_transcript.php"
 # The local end-point where Aristote will notify that the enrichment is ready (and trigger the last step of the process)
-webhook-url: "https://beta.lutice.online/bbb-transcript/aristote_webhook.php"
+webhook-url: "https://{server_url}/bbb-transcript/aristote_webhook.php"
 ### ARISTOTE CREDENTIALS
 credentials:
   id: ""
