@@ -33,23 +33,23 @@ function replace_param(){
 }
 
 function usage(){
+    cat <<EOF
 
-    echo -e ""
-    echo -e "******************** BBB-TRANSCRIPT INSTALL MANAGER ********************"
-    echo -e ""
-    echo -e "Usage:"
-    echo -e "  ./installer.sh <options>"
-    echo -e "  "
-    echo -e "Available actions:"
-    echo -e "  --install\t\t\tTo install/update the system files"
-    echo -e "  --uninstall\t\t\tDelete all related files"
-    echo -e "  --export_to <directory>\tExport all ACTUAL system files related to a new root directory"
-    echo -e "  "
-    echo -e "Flags:"
-    echo -e "  --confirm\t\t\tDisable the DRY RUN."
-    echo -e "  --force\t\t\tDoesn't prompt confirmation upon uninstalling"
-    echo -e "  "
-    echo -e "  "
+******************** BBB-TRANSCRIPT INSTALL MANAGER ********************
+
+Usage:
+  ./installer.sh <options>
+
+Available actions:
+  --install		    To install/update the system files
+  --uninstall		    Delete all related files
+  --export_to <directory>   Export all ACTUAL system files related to a new root directory
+
+Flags:
+  --confirm		    Disable the DRY RUN.
+  --force		    Doesn't prompt confirmation upon uninstalling
+
+EOF
 }
 directory_src_folder="."
 installing=""
@@ -139,11 +139,16 @@ if [[ -n "$export_to" ]]; then
     else
 	echo -e "\n\n------------- Exporting files to $export_to (DRY RUN) -------------"
     fi
-    while IFS= read -r file_path; do
+    while IFS= read -r line; do
 	
-	if [ -z "$file_path" ]; then
+	if [ -z "$line" ]; then
 	    continue
 	fi
+
+	file_path=$(echo "$line" | awk '{print $1}')
+# ownership=$(echo "$line" | awk '{print $2}')
+# permissions=$(echo "$line" | awk '{print $3}')
+
 
 	if [[ -f "$file_path" ]]; then
 	    
@@ -187,13 +192,18 @@ elif [ "$installing" == "true" ]; then
 
     echo -e "\n\n--- Copying files ---"
 
-    while IFS= read -r file_path; do
-	
-	if [ -z "$file_path" ]; then
+    while IFS= read -r line; do
+    	
+	if [ -z "$line" ]; then
 	    continue
 	fi
 
-	if [[ -f "$directory_src_folder$file_path" ]]; then
+	file_path=$(echo "$line" | awk '{print $1}')
+	ownership=$(echo "$line" | awk '{print $2}')
+	permissions=$(echo "$line" | awk '{print $3}')
+
+
+	if [[ -f "$directory_src_folder$file_path" || -d "$directory_src_folder$file_path" ]]; then
 	    
 	    dir_name=$(dirname "${file_path}")
 
@@ -212,6 +222,13 @@ elif [ "$installing" == "true" ]; then
 		    echo "Couldn't copy '$directory_src_folder$file_path'"
 		else
 		    echo "Copied '$directory_src_folder$file_path'"
+		    if [[ -n "$ownership" ]]; then
+			chown "$ownership" "$file_path"
+		    fi
+		    
+		    if [[ -n "$permissions" ]]; then
+			chmod "$permissions" "$file_path"
+		    fi
 		fi
 	    else
 		# echo "Would create '$dir_name'"
@@ -273,7 +290,7 @@ elif [ "$installing" == "true" ]; then
     conf_file=$(get_param "config_file_loc")
     vars_to_replace=$(get_param "vars_to_install")
     for var in $vars_to_replace; do
-	replace_param "$var" "$conf_file" "$dryrun"
+	replace_param "[$var]" "$conf_file" "$dryrun"
     done
 
 
@@ -331,9 +348,13 @@ elif [[ "$uninstalling" == "true" ]]; then
 
     while IFS= read -r file_path; do
 	
-	if [ -z "$file_path" ]; then
+	if [ -z "$line" ]; then
 	    continue
 	fi
+
+	file_path=$(echo "$line" | awk '{print $1}')
+# ownership=$(echo "$line" | awk '{print $2}')
+# permissions=$(echo "$line" | awk '{print $3}')
 
 	if [[ -f "$directory_src_folder$file_path" ]]; then
 	    
@@ -355,7 +376,7 @@ elif [[ "$uninstalling" == "true" ]]; then
 	    fi
 
 	else
-	    echo "File '$file_path' doesn't not even exist"
+	    echo "File '$file_path' doesn't even exist"
 	fi
     done < "$FILE_LIST"
 

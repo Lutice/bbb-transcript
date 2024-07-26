@@ -19,7 +19,7 @@ cache:
 ### SERVER CONFIGURATION
 aristote-server:
   # Url of the aristote server
-  url: "ARISTOTE_URL"
+  url: "[ARISTOTE_SERVER_URL]"
   # Delete aristote enrichment (and enrichment-to-meeting local temp file) after successfully fetching it ?
   keep-clean: true 
   paths:
@@ -31,18 +31,18 @@ aristote-server:
     get-token: "/api/token"
     delete-enrichment: "/api/v1/enrichments/{id}"
 # The local end-point where a GET request can be sent to get a meeting's transcript with its meeting ID
-get-transcript-url: "https://{server_url}/bbb-transcript/get_transcript.php"
+get-transcript-url: "https://[YOUR_SERVER_URL]/bbb-transcript/get_transcript.php"
 # The local end-point where Aristote will notify that the enrichment is ready (and trigger the last step of the process)
-webhook-url: "https://{server_url}/bbb-transcript/aristote_webhook.php"
+webhook-url: "https://[YOUR_SERVER_URL]/bbb-transcript/aristote_webhook.php"
 ### ARISTOTE CREDENTIALS
 credentials:
-  id: ""
-  password: ""
+  id: "[ARISTOTE_ID]"
+  password: "[ARISTOTE_PASSWORD]"
 ### LOGS & DEBUG
 logs:
   # Will the requests to webhook-url, printed to the logs ?
   print-webhook-requests: true
-  # Where each log type will be printed ? (Working to log everything in BBB)
+  # Where each log type will be printed ? (Beware, the log file must have the write permission for www-data for the about-webhook, and bigbluebutton for the others) (Working to log everything in BBB)
   paths:
     about-token: "/var/log/bbb-transcript/tokens.log"
     about-upload: "/var/log/bbb-transcript/enrichment_start.log"
