@@ -23,5 +23,6 @@
 /var/log/bbb-transcript/webhook_php.log www-data:www-data 644
 /var/log/bbb-transcript/tokens.log bigbluebutton:bigbluebutton 644
 /var/log/bbb-transcript/enrichment_start.log bigbluebutton:bigbluebutton 644
-/var/log/bbb-transcript/get_transcript.log bigbluebutton:bigbluebutton 644
+/var/log/bbb-transcript/get_transcript.log www-data:www-data 644
+
 /var/bigbluebutton/token.cache bigbluebutton:www-data 664
