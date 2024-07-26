@@ -41,13 +41,14 @@ Usage:
   ./installer.sh <options>
 
 Available actions:
-  --install		    To install/update the system files
-  --uninstall		    Delete all related files
-  --export_to <directory>   Export all ACTUAL system files related to a new root directory
+  --install		    To install/update the system files.
+  --uninstall		    Delete all related files.
+  --export_to <directory>   Export all ACTUAL system files related to a new root directory.
 
 Flags:
+  --diff		    Variant of the DRY RUN: show in detail what will be added (using the diff command for each file).
   --confirm		    Disable the DRY RUN.
-  --force		    Doesn't prompt confirmation upon uninstalling
+  --force		    Doesn't prompt confirmation upon uninstalling.
 
 EOF
 }
@@ -57,6 +58,7 @@ uninstalling=""
 export_to=""
 force=false
 dryrun=true
+diff=false
 
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root. Please use sudo." 1>&2
@@ -97,6 +99,12 @@ while [[ $# -ge 1 ]]; do
     if [[ "$1" == "--force" ]]; then
 	shift
 	force=true
+	continue
+    fi
+    
+    if [[ "$1" == "--diff" ]]; then
+	shift
+	diff=true
 	continue
     fi
 
@@ -172,6 +180,9 @@ if [[ -n "$export_to" ]]; then
 	    else
 		# echo "Would create '$dir_name'"
 		echo "Would copy '$file_path' to '$export_to$file_path'"
+		if [[ "$diff" == true ]]; then
+		    diff "$file_path" "$export_to$file_path"
+		fi
 	    fi
 
 	else
@@ -233,6 +244,9 @@ elif [ "$installing" == "true" ]; then
 	    else
 		# echo "Would create '$dir_name'"
 		echo "Would copy '$directory_src_folder$file_path' to '$file_path'"
+		if [[ "$diff" == true ]]; then
+		    diff "$directory_src_folder$file_path" "$file_path" 
+		fi
 	    fi
 
 	else
@@ -346,7 +360,7 @@ elif [[ "$uninstalling" == "true" ]]; then
 
     echo -e "\n\n--- Deleting files ---"
 
-    while IFS= read -r file_path; do
+    while IFS= read -r line; do
 	
 	if [ -z "$line" ]; then
 	    continue
