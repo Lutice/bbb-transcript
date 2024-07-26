@@ -1,0 +1,2 @@
+nginx /etc/bigbluebutton.custom/bbb-transcript/aristote_webhook.nginx /etc/bigbluebutton/nginx/bbb_transcript.nginx
+

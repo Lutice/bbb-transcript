@@ -2,7 +2,7 @@
 
 
 FILE_LIST="FILE_LIST"
-DIR_LIST="DIRECTORY_LIST"
+LINK_LIST="LINK_LIST"
 
 function abort(){
     echo "Operation Aborted."
@@ -11,6 +11,9 @@ function abort(){
 
 function usage(){
 
+    echo -e ""
+    echo -e "******************** BBB-TRANSCRIPT INSTALL MANAGER ********************"
+    echo -e ""
     echo -e "Usage:"
     echo -e "  ./installer.sh <options>"
     echo
@@ -21,8 +24,6 @@ function usage(){
     echo -e "  --export_to <directory>\tExport all ACTUAL system files related to a new root directory"
     echo -e "  "
     echo -e "  "
-#    echo "Note:"
-#    echo "  Exporting might be"
 }
 directory_src_folder="."
 installing=""
@@ -151,6 +152,9 @@ elif [ "$installing" == "true" ]; then
     else
 	echo "------------- Installing files (DRY RUN) -------------"
     fi
+
+    echo "--- Copying files ---"
+
     while IFS= read -r file_path; do
 	
 	if [ -z "$file_path" ]; then
@@ -162,6 +166,8 @@ elif [ "$installing" == "true" ]; then
 	    dir_name=$(dirname "${file_path}")
 
 	    if [[ "$dryrun" == "false" ]]; then
+	    
+		# Copy all referenced files at their location
 		mkdir -p "$dir_name"
 		if [[ $? -ne 0 ]]; then
 		    echo "Failed to create '$dir_name'"
@@ -170,7 +176,6 @@ elif [ "$installing" == "true" ]; then
 		fi
 
 		cp -r "$directory_src_folder$file_path" "$file_path"
-		
 		if [[ $? -ne 0 ]]; then
 		    echo "Couldn't copy '$directory_src_folder$file_path'"
 		else
@@ -186,8 +191,136 @@ elif [ "$installing" == "true" ]; then
 	fi
     done < "$FILE_LIST"
 
+    echo "--- Linking files ---"
+
+    while IFS= read -r line; do
+	
+	if [ -z "$line" ]; then
+	    continue
+	fi
+
+	log_label=$(echo "$line" | awk '{print $1}')
+	target_link=$(echo "$line" | awk '{print $2}')
+	link_name=$(echo "$line" | awk '{print $3}')
+
+	echo "Linking $log_label file..."
+
+	if [[ -f "$target_link" ]]; then
+	    
+	    dir_name=$(dirname "${file_path}")
+
+	    if [[ "$dryrun" == "false" ]]; then
+	    
+		# Copy all referenced files at their location
+		mkdir -p "$dir_name"
+		if [[ $? -ne 0 ]]; then
+		    echo "Failed to create '$dir_name'"
+		else
+		    echo "Created directory '$dir_name'"
+		fi
+
+		ln -s "$target_link" "$link_name"
+		if [[ $? -ne 0 ]]; then
+		    echo "Couldn't create link '$link_name' pointing to '$target_link'"
+		else
+		    echo "Linked '$link_name' to '$target_link'"
+		fi
+	    else
+		echo "Would create '$dir_name'"
+		echo "Would link '$link_name' to '$target_link'"
+	    fi
+
+	else
+	    echo "File '$target_link' is missing! Unable to create link '$link_name'"
+	fi
+    done < "$LINK_LIST"
+
+
+    echo "--- Checking permissions ---"
+    
+    # TODO: Check all permissions after installation
+    # TODO: Check if logs and token cache files needs to be created
+
     echo
     echo "Done installing."
+elif [[ "$uninstalling" == "true" ]]; then
+    
+    if [ "$dryrun" == "false" ]; then
+	echo "------------- Uninstalling files -------------"
+    else
+	echo "------------- Uninstalling files (DRY RUN) -------------"
+    fi
+
+    echo "--- Unlinking files ---"
+
+    while IFS= read -r line; do
+	
+	if [ -z "$line" ]; then
+	    continue
+	fi
+
+	log_label=$(echo "$line" | awk '{print $1}')
+	target_link=$(echo "$line" | awk '{print $2}')
+	link_name=$(echo "$line" | awk '{print $3}')
+
+	echo "Unlinking $log_label file..."
+
+	if [[ -f "$target_link" ]]; then
+	    
+	    dir_name=$(dirname "${link_name}")
+
+	    if [[ "$dryrun" == "false" ]]; then
+	    
+		unlink "$link_name"
+		if [[ $? -ne 0 ]]; then
+		    echo "Couldn't unlink '$link_name' pointing to '$target_link'"
+		else
+		    echo "Unlinked '$link_name' to '$target_link'"
+		fi
+	    else
+		echo "Would unlink '$link_name' to '$target_link'"
+	    fi
+
+	else
+	    echo "File '$target_link' doesn't even exist for '$link_name'"
+	fi
+    done < "$LINK_LIST"
+
+    echo "--- Deleting files ---"
+
+    while IFS= read -r file_path; do
+	
+	if [ -z "$file_path" ]; then
+	    continue
+	fi
+
+	if [[ -f "$directory_src_folder$file_path" ]]; then
+	    
+	    dir_name=$(dirname "${file_path}")
+
+	    if [[ "$dryrun" == "false" ]]; then
+	    
+		rm "$file_path"
+		if [[ $? -ne 0 ]]; then
+		    echo "Couldn't delete '$file_path'"
+		else
+		    echo "Deleted $file_path'"
+		fi
+
+		find "$dir_name" -type d -empty -delete
+	    else
+		echo "Would partially delete '$dir_name'"
+		echo "Would delete '$file_path'"
+	    fi
+
+	else
+	    echo "File '$file_path' doesn't not even exist"
+	fi
+    done < "$FILE_LIST"
+
+
+    echo "Uninstall done."
+
 fi    
 
 exit 0
