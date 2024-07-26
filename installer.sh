@@ -126,7 +126,7 @@ if [[ "$installing" == "true" && "$uninstalling" == "true" || "$installing" == "
     exit 0
 fi
 
-if [[ -z "$export_to" && "$dryrun" == "false" && "$force" != "true" ]]; then
+if [[ "$uninstalling" == "true" && "$dryrun" == "false" && "$force" != "true" ]]; then
     read -p "Are you sure you want to uninstall bbb-transcript ? (yes/no) " choice
 
     if [[ "$choice" != "yes" ]]; then
@@ -191,7 +191,12 @@ if [[ -n "$export_to" ]]; then
     done < "$FILE_LIST"
 
     echo
-    echo "Done exporting to directory $export_to."
+    if [[ "$dryrun" == "false" ]]; then
+	echo "Done exporting to directory $export_to."
+    else
+	echo "Dry run finished."
+    fi
+    echo ""
 
 elif [ "$installing" == "true" ]; then
 
@@ -314,7 +319,13 @@ elif [ "$installing" == "true" ]; then
     # TODO: Create logs folder and token cache files
 
     echo
-    echo "Done installing."
+    if [[ "$dryrun" == "false" ]]; then
+	echo "Done installing."
+    else
+	echo "Dry run finished."
+    fi
+
+
 elif [[ "$uninstalling" == "true" ]]; then
     
     if [ "$dryrun" == "false" ]; then
@@ -370,7 +381,7 @@ elif [[ "$uninstalling" == "true" ]]; then
 # ownership=$(echo "$line" | awk '{print $2}')
 # permissions=$(echo "$line" | awk '{print $3}')
 
-	if [[ -f "$directory_src_folder$file_path" ]]; then
+	if [[ -f "$file_path" ]]; then
 	    
 	    dir_name=$(dirname "${file_path}")
 
@@ -395,7 +406,12 @@ elif [[ "$uninstalling" == "true" ]]; then
     done < "$FILE_LIST"
 
 
-    echo "Uninstall done."
+    echo ""
+    if [[ "$dryrun" == "false" ]]; then
+	echo "Uninstallation completed."
+    else
+	echo "Dry run finished."
+    fi
 
 fi    
 
