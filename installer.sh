@@ -10,9 +10,13 @@ function abort(){
     exit 0
 }
 
+function escape() {
+    echo "$1" | sed 's/[]\/$*.^[]/\\&/g'
+}
+
 function get_param(){
     key="$1"
-    grep "^$key=" "$INSTALL_CONFIG" | cut -d'=' -f2
+    grep "^$key=" "$INSTALL_CONFIG" | cut -d'=' -f2-
 }
 
 function replace_param(){
@@ -24,7 +28,14 @@ function replace_param(){
 	echo "Note: parameter '$param' unset."
     else
 	if [[ "$dry_run" == "false" ]]; then
-	    sed -i 's/{{'"$param"'}}/'"$value"'/g' "$config_file_location"
+# echo "Before escape: $param"
+# echo "Before escape: $value"
+	    escaped_param=$(escape "[$param]")
+	    escaped_value=$(escape "$value")
+# echo "After escape: $escaped_param"
+# echo "After escape: $escaped_value"
+	    command_string="s/[$escaped_param]/$escaped_value/g"
+	    sed -i "$command_string" "$config_file_location"
 	    echo "Applied parameter '$param' to '$value'"
 	else
 	    echo "Would apply parameter '$param' to '$value' to file '$config_file_location'"
@@ -309,7 +320,7 @@ elif [ "$installing" == "true" ]; then
     conf_file=$(get_param "config_file_loc")
     vars_to_replace=$(get_param "vars_to_install")
     for var in $vars_to_replace; do
-	replace_param "[$var]" "$conf_file" "$dryrun"
+	replace_param "$var" "$conf_file" "$dryrun"
     done
 
 
@@ -320,6 +331,8 @@ elif [ "$installing" == "true" ]; then
 
     echo
     if [[ "$dryrun" == "false" ]]; then
+	echo -e "\n\n--- Restarting Nginx ---"
+	systemctl restart nginx.service
 	echo "Done installing."
     else
 	echo "Dry run finished."
