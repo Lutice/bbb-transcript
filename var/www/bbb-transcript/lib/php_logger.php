@@ -27,11 +27,11 @@ class Logger {
 		
 		$path = dirname($filePath);
 
-		if (is_writable($path)){
-		    echo "$path is writable by data-www";
-		}
-		else
-		    echo "$path not writable by data-www";
+# if (is_writable($path)){
+# echo "$path is writable by data-www";
+# }
+# else
+# echo "$path not writable by data-www";
 
 		$this->logFile = fopen($filePath, 'a+'); // Open existing file in append mode
 
