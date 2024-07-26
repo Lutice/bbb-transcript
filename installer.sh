@@ -3,10 +3,33 @@
 
 FILE_LIST="FILE_LIST"
 LINK_LIST="LINK_LIST"
+INSTALL_CONFIG="INSTALL.config"
 
 function abort(){
     echo "Operation Aborted."
     exit 0
+}
+
+function get_param(){
+    key="$1"
+    grep "^$key=" "$INSTALL_CONFIG" | cut -d'=' -f2
+}
+
+function replace_param(){
+    dry_run="$3" 
+    config_file_location="$2"
+    param="$1"
+    value=$(get_param "$param")
+    if [[ -z "$value" ]]; then
+	echo "Note: parameter '$param' unset."
+    else
+	if [[ "$dry_run" == "false" ]]; then
+	    sed -i 's/{{'"$param"'}}/'"$value"'/g' "$config_file_location"
+	    echo "Applied parameter '$param' to '$value'"
+	else
+	    echo "Would apply parameter '$param' to '$value' to file '$config_file_location'"
+	fi
+    fi
 }
 
 function usage(){
@@ -112,9 +135,9 @@ fi
 if [[ -n "$export_to" ]]; then
 
     if [ "$dryrun" == "false" ]; then
-	echo "------------- Exporting files to $export_to -------------"
+	echo -e "\n\n------------- Exporting files to $export_to -------------"
     else
-	echo "------------- Exporting files to $export_to (DRY RUN) -------------"
+	echo -e "\n\n------------- Exporting files to $export_to (DRY RUN) -------------"
     fi
     while IFS= read -r file_path; do
 	
@@ -157,12 +180,12 @@ if [[ -n "$export_to" ]]; then
 elif [ "$installing" == "true" ]; then
 
     if [ "$dryrun" == "false" ]; then
-	echo "------------- Installing files -------------"
+	echo -e "\n\n------------- Installing files -------------"
     else
-	echo "------------- Installing files (DRY RUN) -------------"
+	echo -e "\n\n------------- Installing files (DRY RUN) -------------"
     fi
 
-    echo "--- Copying files ---"
+    echo -e "\n\n--- Copying files ---"
 
     while IFS= read -r file_path; do
 	
@@ -200,7 +223,7 @@ elif [ "$installing" == "true" ]; then
 	fi
     done < "$FILE_LIST"
 
-    echo "--- Linking files ---"
+    echo -e "\n\n--- Linking files ---"
 
     while IFS= read -r line; do
 	
@@ -245,22 +268,31 @@ elif [ "$installing" == "true" ]; then
     done < "$LINK_LIST"
 
 
-    echo "--- Checking permissions ---"
+    echo -e "\n\n--- Replacing arguments  ---"
+
+    conf_file=$(get_param "config_file_loc")
+    vars_to_replace=$(get_param "vars_to_install")
+    for var in $vars_to_replace; do
+	replace_param "$var" "$conf_file" "$dryrun"
+    done
+
+
+    echo -e "\n\n--- Checking permissions ---"
     
     # TODO: Check all permissions after installation
-    # TODO: Check if logs and token cache files needs to be created
+    # TODO: Create logs folder and token cache files
 
     echo
     echo "Done installing."
 elif [[ "$uninstalling" == "true" ]]; then
     
     if [ "$dryrun" == "false" ]; then
-	echo "------------- Uninstalling files -------------"
+	echo -e "\n\n------------- Uninstalling files -------------"
     else
-	echo "------------- Uninstalling files (DRY RUN) -------------"
+	echo -e "\n\n------------- Uninstalling files (DRY RUN) -------------"
     fi
 
-    echo "--- Unlinking files ---"
+    echo -e "\n\n--- Unlinking files ---"
 
     while IFS= read -r line; do
 	
@@ -295,7 +327,7 @@ elif [[ "$uninstalling" == "true" ]]; then
 	fi
     done < "$LINK_LIST"
 
-    echo "--- Deleting files ---"
+    echo -e "\n\n--- Deleting files ---"
 
     while IFS= read -r file_path; do
 	

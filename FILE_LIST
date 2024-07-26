@@ -19,3 +19,6 @@
 /var/www/bbb-transcript/lib/get_token.php
 /var/www/bbb-transcript/lib/php_logger.php
 /var/www/bbb-transcript/lib/utils.php
+
+/var/log/bbb-transcript/
+/var/log/bigbluebutton/token_cache
