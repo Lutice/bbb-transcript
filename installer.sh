@@ -19,6 +19,15 @@ function get_param(){
     grep "^$key=" "$INSTALL_CONFIG" | cut -d'=' -f2-
 }
 
+function check_user(){
+    if id "$1" >/dev/null 2>&1; then
+	return
+    else
+	false
+    fi
+
+}
+
 function replace_param(){
     dry_run="$3" 
     config_file_location="$2"
@@ -34,7 +43,7 @@ function replace_param(){
 	    escaped_value=$(escape "$value")
 # echo "After escape: $escaped_param"
 # echo "After escape: $escaped_value"
-	    command_string="s/[$escaped_param]/$escaped_value/g"
+	    command_string="s/$escaped_param/$escaped_value/g"
 	    sed -i "$command_string" "$config_file_location"
 	    echo "Applied parameter '$param' to '$value'"
 	else
@@ -60,6 +69,10 @@ Flags:
   --diff		    Variant of the DRY RUN: show in detail what will be added (using the diff command for each file).
   --confirm		    Disable the DRY RUN.
   --force		    Doesn't prompt confirmation upon uninstalling.
+
+Note:
+  Don't forget to fill up the INSTALL.config file for a faster installation.
+  You could always fill the necessary parameters in the config file that will be copied to (/etc/bigbluebutton.custom.bbb-transcript/aristote_config.yml).
 
 EOF
 }
@@ -217,8 +230,30 @@ elif [ "$installing" == "true" ]; then
 	echo -e "\n\n------------- Installing files (DRY RUN) -------------"
     fi
 
-    echo -e "\n\n--- Copying files ---"
+    echo -e "\n\n--- Checking users  ---"
 
+    bad_config=false
+
+    bbb_user=$(get_param "bbb_user")
+    php_user=$(get_param "php_user")
+    if ! check_user "$bbb_user"; then
+	echo -e "The user '$bbb_user' doesn't exist for 'bbb_user'"
+	bad_config=true
+    else
+	echo -e "Will be using the user '$bbb_user' for 'bbb_user'"
+    fi
+    if ! check_user "$php_user"; then
+	echo -e "The user '$php_user' doesn't exist for 'php_user'"
+	bad_config=true
+    else
+	echo -e "Will be using the user '$php_user' for 'php_user'"
+    fi
+
+    if [[ "$bad_config" == "true" && "$dryrun" == "false" ]]; then
+	exit 1
+    fi
+
+    echo -e "\n\n--- Copying files ---"
     while IFS= read -r line; do
     	
 	if [ -z "$line" ]; then
@@ -270,6 +305,20 @@ elif [ "$installing" == "true" ]; then
 	fi
     done < "$FILE_LIST"
 
+    
+    echo -e "\n\n--- Transcripts directory ---"
+    if [[ "$dryrun" == "false" ]]; then 
+	mkdir -p "/var/bigbluebutton/transcripts"
+        chown bigbluebutton:www-data "/var/bigbluebutton/transcripts"
+	echo "Created '/var/bigbluebutton/transcripts'"
+    else
+	if [[ -d "/var/bigbluebutton/transcripts" ]]; then
+	    echo "Directory '/var/bigbluebutton/transcripts'"
+	else
+	    echo "Would create '/var/bigbluebutton/transcripts'"
+	fi
+    fi
+
     echo -e "\n\n--- Linking files ---"
 
     while IFS= read -r line; do
@@ -305,7 +354,7 @@ elif [ "$installing" == "true" ]; then
 		    echo "Linked '$link_name' to '$target_link'"
 		fi
 	    else
-		# echo "Would create '$dir_name'"
+		echo "Would create '$dir_name'"
 		echo "Would link '$link_name' to '$target_link'"
 	    fi
 
@@ -327,7 +376,6 @@ elif [ "$installing" == "true" ]; then
     echo -e "\n\n--- Checking permissions ---"
     
     # TODO: Check all permissions after installation
-    # TODO: Create logs folder and token cache files
 
     echo
     if [[ "$dryrun" == "false" ]]; then
@@ -422,6 +470,11 @@ elif [[ "$uninstalling" == "true" ]]; then
     echo ""
     if [[ "$dryrun" == "false" ]]; then
 	echo "Uninstallation completed."
+	read -p "Do you want to clean the transcripts directory? (/var/bigbluebutton/transcripts) " clean_transcript
+	if [[ "$clean_transcript" == "yes" ]]; then
+	   rm -fr "/var/bigbluebutton/transcripts"
+	   echo "Cleared /var/bigbluebutton/transcripts"
+	fi
     else
 	echo "Dry run finished."
     fi
