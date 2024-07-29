@@ -35,6 +35,7 @@ function replace_param(){
     value=$(get_param "$param")
     if [[ -z "$value" ]]; then
 	echo "Note: parameter '$param' unset."
+	false
     else
 	if [[ "$dry_run" == "false" ]]; then
 # echo "Before escape: $param"
@@ -45,9 +46,17 @@ function replace_param(){
 # echo "After escape: $escaped_value"
 	    command_string="s/$escaped_param/$escaped_value/g"
 	    sed -i "$command_string" "$config_file_location"
-	    echo "Applied parameter '$param' to '$value'"
+	    command_success=$?
+	    if [[ "$command_success" -eq 0 ]]; then
+		echo "Applied parameter '$param' to '$value'"
+		return
+	    else
+		echo "Failed to apply parameter '$param' to '$value'"
+		false
+	    fi
 	else
 	    echo "Would apply parameter '$param' to '$value' to file '$config_file_location'"
+	    return
 	fi
     fi
 }
@@ -271,19 +280,29 @@ elif [ "$installing" == "true" ]; then
 
 	    if [[ "$dryrun" == "false" ]]; then
 	    
-		# Copy all referenced files at their location
-		mkdir -p "$dir_name"
-		if [[ $? -ne 0 ]]; then
-		    echo "Failed to create '$dir_name'"
-		else
-		    echo "Created directory '$dir_name'"
+		if ! [[ -d "$dir_name" ]]; then	
+		    mkdir -p "$dir_name"
+		    if [[ $? -ne 0 ]]; then
+			echo "Failed to create '$dir_name'"
+		    else
+			echo "Created directory '$dir_name'"
+		    fi
+		fi
+
+		overwritten=false
+		if [ -f "$file_path" ]; then
+		    overwritten=true
 		fi
 
 		cp -r "$directory_src_folder$file_path" "$file_path"
 		if [[ $? -ne 0 ]]; then
 		    echo "Couldn't copy '$directory_src_folder$file_path'"
 		else
-		    echo "Copied '$directory_src_folder$file_path'"
+		    if [[ "$overwritten" == "true" ]]; then
+			echo "Overwritten '$file_path'"
+		    else
+			echo "Copied '$file_path'"
+		    fi
 		    if [[ -n "$ownership" ]]; then
 			chown "$ownership" "$file_path"
 		    fi
@@ -293,8 +312,14 @@ elif [ "$installing" == "true" ]; then
 		    fi
 		fi
 	    else
-		# echo "Would create '$dir_name'"
-		echo "Would copy '$directory_src_folder$file_path' to '$file_path'"
+		if ! [[ -d "$dir_name" ]]; then	
+		    echo "Would create $dir_name"
+		fi
+		if [[ -f "$file_path" ]]; then
+		    echo "'$file_path' already exists and would be overwritten"
+		else
+		    echo "Would copy '$directory_src_folder$file_path' to '$file_path'"
+		fi
 		if [[ "$diff" == true ]]; then
 		    diff "$directory_src_folder$file_path" "$file_path" 
 		fi
@@ -313,7 +338,7 @@ elif [ "$installing" == "true" ]; then
 	echo "Created '/var/bigbluebutton/transcripts'"
     else
 	if [[ -d "/var/bigbluebutton/transcripts" ]]; then
-	    echo "Directory '/var/bigbluebutton/transcripts'"
+	    echo "Directory '/var/bigbluebutton/transcripts' already exists."
 	else
 	    echo "Would create '/var/bigbluebutton/transcripts'"
 	fi
@@ -365,13 +390,16 @@ elif [ "$installing" == "true" ]; then
 
 
     echo -e "\n\n--- Replacing arguments  ---"
-
+    
+    missing_args=""
     conf_file=$(get_param "config_file_loc")
     vars_to_replace=$(get_param "vars_to_install")
     for var in $vars_to_replace; do
-	replace_param "$var" "$conf_file" "$dryrun"
+	if ! replace_param "$var" "$conf_file" "$dryrun"; then
+	    missing_args="$missing_args $var"
+	fi
     done
-
+    
 
     echo -e "\n\n--- Checking permissions ---"
     
@@ -381,7 +409,18 @@ elif [ "$installing" == "true" ]; then
     if [[ "$dryrun" == "false" ]]; then
 	echo -e "\n\n--- Restarting Nginx ---"
 	systemctl restart nginx.service
-	echo "Done installing."
+	if [[ "$?" -ne 0 ]]; then
+	    echo "Something went wrong when restarting NGINX. Please check the logs of the installation above."
+	else
+	    echo "Done installing."
+	    if [[ -n "$missing_args" ]]; then
+		echo -e "\nThe following arguments were or did not set correctly:"
+		for missing_arg in $missing_args; do
+		    echo "- $missing_arg"
+		done
+		echo -e "\nTo make the system fully functionnal, please replace the variables in [brackets] contained in the following file:\n'/etc/bigbluebutton.custom/bbb-transcript/aristote_config.yml'"
+	    fi
+	fi
     else
 	echo "Dry run finished."
     fi
