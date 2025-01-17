@@ -77,6 +77,8 @@ logger = RubyLogger.new(config['logs']['paths']['about-upload'])
 new_enrichment_path = "#{config['aristote-server']['url']}#{config['aristote-server']['paths']['new-enrichment']}"
 new_enrichment_uri = URI(new_enrichment_path)
 
+BigBlueButton.logger.info("#{new_enrichment_path}")
+
 # MAYDO: See the best strategy for migrating the videos (multiple enrichments or one single big file)
 ## 1st strategy: Merge the videos (would it be better to create seperate enrichments for each to split the work ?
 
@@ -127,6 +129,7 @@ end
 upload_filepath = temp_merge_filepath
 upload_filetype = 'audio/opus'
 upload_original_filename = File.basename(upload_filepath)
+BigBlueButton.logger.info(upload_filepath)
 
 # Build the request to the API with an header body and authorization
 token_value = TokenManager.getToken()
@@ -146,6 +149,7 @@ form_data = [
 video_request.set_form form_data, 'multipart/form-data'
 BigBlueButton.logger.info("Uploading file...")
 # Send the request
+
 worker_response = Net::HTTP.start(new_enrichment_uri.hostname, new_enrichment_uri.port, :use_ssl => true) { |http|
         http.request(video_request)
 }
@@ -155,6 +159,11 @@ if (!worker_response.respond_to?(:code) || !worker_response.respond_to?(:body))
         logger.log("Bad response. Returned data might be corrupted. (Missing header 'code' and 'body' container)", stdPrint: true)
         exit 1
 end
+
+BigBlueButton.logger.info("#{config['webhook-url']}")
+response = JSON.parse(worker_response.body)
+BigBlueButton.logger.info("#{response}")
+
 
 if (worker_response.code != '200')
         BigBlueButton.logger.info("#{worker_response.code}: #{worker_response.message} - while creating enrichment")
