@@ -5,7 +5,7 @@ This system provides an automated way to retrieve a transcript of any BigBlueBut
 
 # How to use it ?
 ## Quick install
-- `git clone https://github.com/AdriKat2022/bbb-transcript.git` to clone the project in a lambda temporary directory ;
+- `git clone https://github.com/Lutice/bbb-transcript.git` to clone the project in a lambda temporary directory ;
 - `cd bbb-transcript/` to go in the cloned directory ;
 - `sudo nano INSTALL.config` or `sudo vim INSTALL.config` to customize your installation *(you can always modify the `aristote_config.yml` configuration file later, after the installation)* ;
 - `sudo ./installer.sh` and follow the instructions to install it on your system ;
