@@ -192,7 +192,13 @@ module TokenManager
 		    puts message if !@@logger.log message
 		    return nil
 		end
-		token_data = JSON.parse(json_token, symbolize_names: true)
+
+                begin
+                    token_data = JSON.parse(json_token, symbolize_names: true)
+                rescue JSON::ParserError
+                    puts "No token, creating one"
+                    return
+                end
 		
 		return nil if DateTime.now > DateTime.parse(token_data[:expiration_date])
 

@@ -335,6 +335,7 @@ elif [ "$installing" == "true" ]; then
     if [[ "$dryrun" == "false" ]]; then 
 	mkdir -p "/var/bigbluebutton/transcripts"
         chown bigbluebutton:www-data "/var/bigbluebutton/transcripts"
+        chmod 775 "/var/bigbluebutton/transcripts"
 	echo "Created '/var/bigbluebutton/transcripts'"
     else
 	if [[ -d "/var/bigbluebutton/transcripts" ]]; then

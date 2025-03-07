@@ -49,11 +49,13 @@ logs:
     about-webhook: "/var/log/bbb-transcript/webhook_php.log"
     about-get-transcript: "/var/log/bbb-transcript/get_transcript.log"
 ### ENRICHMENT OPTIONS
+enrichment-options:
 # (THE FOLLOWING IS NOT SUPPORTED YET BY ARISTOTE)
 # AI MODEL
-# AiModel: LLama2-7b
+  ai-model: LLama2-7b
 # AiModel: Llama-3-70b-Instruct-AWQ
 # AiModel: OpenHermes-2.5-Mistral-7B
 # INFRASTRUCTURE
-# Infrastructure: Univ-Paris-Saclay
+  infrastructure: Univ-Paris-Saclay
 # Infrastructure: CentraleSupélec
+  language: fr

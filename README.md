@@ -3,6 +3,9 @@
 # The goal of BBB-transcript
 This system provides an automated way to retrieve a transcript of any BigBlueButton meeting thanks to the Aristote AI, developped by Central Supélec.
 
+# Before use
+- `apt update && apt install -y php-fpm php-yaml php-curl` need to get transcript after speechToText
+
 # How to use it ?
 ## Quick install
 - `git clone https://github.com/Lutice/bbb-transcript.git` to clone the project in a lambda temporary directory ;

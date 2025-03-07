@@ -133,6 +133,8 @@ BigBlueButton.logger.info(upload_filepath)
 
 # Build the request to the API with an header body and authorization
 token_value = TokenManager.getToken()
+# Remove next line if you want to check aristote token getting
+# BigBlueButton.logger.info(token_value)
 video_request = Net::HTTP::Post.new(new_enrichment_uri)
 video_request['Authorization'] = "Bearer #{token_value}"
 form_data = [
