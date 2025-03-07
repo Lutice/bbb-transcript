@@ -84,6 +84,7 @@ The GET request will only be processed by the PHP file if it can verify that the
 - If the checksum is incorrect, a 401 error is returned.
 - If a transcript for the provided meeting_id exists, it is returned.
 - If a transcript for the provided meeting_id does not exist, a 404 error is returned.
+- To check the **[get-transcript-url]** you can use the php script file *test-getTranscript.php* on another server or simple computer with php-cli.
 
 Of course, a 500 error is returned if another unknown error occurs.
 
