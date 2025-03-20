@@ -62,7 +62,7 @@ if (!$checksum) {
 }
 
 // Check secret code with secret bbb-conf (sha256)
-$secret_config = parse_ini_file($config['secret-path']);
+$secret_config = parse_ini_file($config['secret-path'], INI_SCANNER_RAW);
 if ($secret_config === false) {
         $error = json_encode(['error' => 'Unable to verify checksum (failed to parse secret file).']);
 	throw_error($logger, 500, 'Unable to verify checksum (failed to parse secret file).', $error);

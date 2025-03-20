@@ -56,7 +56,7 @@ $checksum = "fake_checksum";
 
 if (!isset($options['correct_checksum']) || $options['correct_checksum'] !== 'false') {
 	// Generate the correct checksum
-	$secret_config = parse_ini_file($config['secret-path']);
+	$secret_config = parse_ini_file($config['secret-path'], INI_SCANNER_RAW);
 	if ($secret_config === false) {
 	        echo "Failed to parse the secret file.";
 	        exit();
